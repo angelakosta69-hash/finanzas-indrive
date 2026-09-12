@@ -1,7 +1,4 @@
 const mysql = require('mysql2/promise');
-require('dotenv').config();
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const config = {
   host: process.env.DB_HOST,
