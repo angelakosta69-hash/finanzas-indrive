@@ -33,6 +33,11 @@ app.get('/api/categorias-gasto', async (req, res) => {
     res.status(500).json({ message: 'Error del servidor.' });
   }
 });
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', port: PORT });
+});
+
+console.log('Puerto:', PORT);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
