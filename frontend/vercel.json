@@ -1,5 +1,23 @@
 {
-  "rewrites": [
-    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.js"
+    },
+    {
+      "src": "/((?!assets/).*)",
+      "dest": "/index.html"
+    }
   ]
 }

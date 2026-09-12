@@ -16,7 +16,18 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const result = await api.auth.login(email, password);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 90000);
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeout);
+      const result = await res.json();
 
       if (result.token) {
         login(result.usuario, result.token);
@@ -24,7 +35,11 @@ const Login = () => {
         setError(result.message || 'Credenciales incorrectas');
       }
     } catch (err) {
-      setError('Error de conexión con el servidor');
+      if (err.name === 'AbortError') {
+        setError('El servidor tardó demasiado. Intenta de nuevo.');
+      } else {
+        setError('Error de conexión con el servidor');
+      }
     } finally {
       setLoading(false);
     }
