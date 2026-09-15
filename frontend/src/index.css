@@ -975,11 +975,52 @@ body {
 /* Mobile (max-width: 768px) */
 @media (max-width: 768px) {
   .navbar {
-    display: none;
+    padding: 10px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nav-brand a {
+    font-size: 16px;
+  }
+
+  .nav-brand-icon {
+    font-size: 20px;
+  }
+
+  .nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .nav-links a {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  .nav-user {
+    gap: 8px;
+  }
+
+  .nav-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .nav-user-name {
+    font-size: 12px;
+  }
+
+  .btn-logout {
+    padding: 5px 10px;
+    font-size: 11px;
   }
 
   .bottom-nav {
-    display: block;
+    display: none;
   }
 
   .app-container {

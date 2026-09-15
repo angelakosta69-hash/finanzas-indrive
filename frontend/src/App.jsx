@@ -41,29 +41,6 @@ const Navbar = () => {
   );
 };
 
-const BottomNav = () => {
-  const location = useLocation();
-
-  return (
-    <nav className="bottom-nav">
-      <div className="bottom-nav-inner">
-        <Link to="/" className={`bottom-nav-item ${location.pathname === '/' ? 'active' : ''}`}>
-          <span className="bottom-nav-icon">📊</span>
-          Dashboard
-        </Link>
-        <Link to="/ingreso" className={`bottom-nav-item ${location.pathname === '/ingreso' ? 'active' : ''}`}>
-          <span className="bottom-nav-icon">💰</span>
-          Ingreso
-        </Link>
-        <Link to="/gasto" className={`bottom-nav-item ${location.pathname === '/gasto' ? 'active' : ''}`}>
-          <span className="bottom-nav-icon">💸</span>
-          Gasto
-        </Link>
-      </div>
-    </nav>
-  );
-};
-
 const AppContent = () => {
   const { token } = useAuth();
 
@@ -79,7 +56,6 @@ const AppContent = () => {
           <Route path="/gasto" element={<PrivateRoute><RegistrarGasto /></PrivateRoute>} />
         </Routes>
       </div>
-      {token && <BottomNav />}
     </>
   );
 };
