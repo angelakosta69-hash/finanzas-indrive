@@ -2,6 +2,8 @@ const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const register = async (req, res) => {
   try {
     const { nombre, email, password, placa_vehiculo } = req.body;
@@ -10,7 +12,19 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Nombre, email y password son requeridos.' });
     }
 
-    const [existing] = await pool.query('SELECT id FROM usuarios WHERE email = ?', [email]);
+    if (nombre.trim().length < 2 || nombre.trim().length > 100) {
+      return res.status(400).json({ message: 'El nombre debe tener entre 2 y 100 caracteres.' });
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({ message: 'El email no es válido.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres.' });
+    }
+
+    const [existing] = await pool.query('SELECT id FROM usuarios WHERE email = ?', [email.toLowerCase().trim()]);
     if (existing.length > 0) {
       return res.status(400).json({ message: 'El email ya está registrado.' });
     }
@@ -19,11 +33,11 @@ const register = async (req, res) => {
 
     const [result] = await pool.query(
       'INSERT INTO usuarios (nombre, email, password, placa_vehiculo) VALUES (?, ?, ?, ?)',
-      [nombre, email, hashedPassword, placa_vehiculo || null]
+      [nombre.trim(), email.toLowerCase().trim(), hashedPassword, placa_vehiculo?.trim() || null]
     );
 
     const token = jwt.sign(
-      { id: result.insertId, email },
+      { id: result.insertId, email: email.toLowerCase().trim() },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -31,7 +45,7 @@ const register = async (req, res) => {
     res.status(201).json({
       message: 'Usuario registrado exitosamente.',
       token,
-      usuario: { id: result.insertId, nombre, email, placa_vehiculo }
+      usuario: { id: result.insertId, nombre: nombre.trim(), email: email.toLowerCase().trim(), placa_vehiculo: placa_vehiculo?.trim() || null }
     });
   } catch (error) {
     console.error(error);
@@ -47,7 +61,11 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Email y password son requeridos.' });
     }
 
-    const [users] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({ message: 'El email no es válido.' });
+    }
+
+    const [users] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email.toLowerCase().trim()]);
     if (users.length === 0) {
       return res.status(401).json({ message: 'Credenciales incorrectas.' });
     }

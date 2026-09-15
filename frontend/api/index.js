@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+const rateLimit = require('express-rate-limit');
 
 const authRoutes = require('./routes/auth');
 const ingresosRoutes = require('./routes/ingresos');
@@ -10,16 +9,33 @@ const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiadas solicitudes. Intenta de nuevo más tarde.' }
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiados intentos de login. Espera 15 minutos.' }
+});
+
 const corsOptions = {
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 
+app.use(limiter);
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/ingresos', ingresosRoutes);
 app.use('/api/gastos', gastosRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -33,6 +49,11 @@ app.get('/api/categorias-gasto', async (req, res) => {
     console.error('Error:', error.message);
     res.status(500).json({ message: 'Error del servidor.' });
   }
+});
+
+app.use((err, req, res, next) => {
+  console.error('Error no manejado:', err.message);
+  res.status(500).json({ message: 'Error del servidor.' });
 });
 
 app.get('/api', (req, res) => {

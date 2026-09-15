@@ -84,21 +84,21 @@ const Dashboard = () => {
       <h2>Hola, {user?.nombre}</h2>
       <p className="subtitle">Resumen de tus finanzas</p>
 
-      <div className="cards-grid">
+      <div className="cards-grid" role="region" aria-label="Resumen financiero">
         <div className="card card-ingreso">
           <h3>Hoy</h3>
           <div className="card-content">
             <div className="card-item">
               <span className="label">Ingresos</span>
-              <span className="value positive">{formatMoney(data?.hoy?.ingresos || 0)}</span>
+              <span className="value positive" aria-label={`Ingresos de hoy: ${formatMoney(data?.hoy?.ingresos || 0)}`}>{formatMoney(data?.hoy?.ingresos || 0)}</span>
             </div>
             <div className="card-item">
               <span className="label">Gastos</span>
-              <span className="value negative">{formatMoney(data?.hoy?.gastos || 0)}</span>
+              <span className="value negative" aria-label={`Gastos de hoy: ${formatMoney(data?.hoy?.gastos || 0)}`}>{formatMoney(data?.hoy?.gastos || 0)}</span>
             </div>
             <div className="card-item total">
               <span className="label">Balance</span>
-              <span className={`value ${(data?.hoy?.balance || 0) >= 0 ? 'positive' : 'negative'}`}>
+              <span className={`value ${(data?.hoy?.balance || 0) >= 0 ? 'positive' : 'negative'}`} aria-label={`Balance de hoy: ${formatMoney(data?.hoy?.balance || 0)}`}>
                 {formatMoney(data?.hoy?.balance || 0)}
               </span>
             </div>
@@ -110,15 +110,15 @@ const Dashboard = () => {
           <div className="card-content">
             <div className="card-item">
               <span className="label">Ingresos</span>
-              <span className="value positive">{formatMoney(data?.semana?.ingresos || 0)}</span>
+              <span className="value positive" aria-label={`Ingresos semanales: ${formatMoney(data?.semana?.ingresos || 0)}`}>{formatMoney(data?.semana?.ingresos || 0)}</span>
             </div>
             <div className="card-item">
               <span className="label">Gastos</span>
-              <span className="value negative">{formatMoney(data?.semana?.gastos || 0)}</span>
+              <span className="value negative" aria-label={`Gastos semanales: ${formatMoney(data?.semana?.gastos || 0)}`}>{formatMoney(data?.semana?.gastos || 0)}</span>
             </div>
             <div className="card-item total">
               <span className="label">Balance</span>
-              <span className={`value ${(data?.semana?.balance || 0) >= 0 ? 'positive' : 'negative'}`}>
+              <span className={`value ${(data?.semana?.balance || 0) >= 0 ? 'positive' : 'negative'}`} aria-label={`Balance semanal: ${formatMoney(data?.semana?.balance || 0)}`}>
                 {formatMoney(data?.semana?.balance || 0)}
               </span>
             </div>
@@ -130,15 +130,15 @@ const Dashboard = () => {
           <div className="card-content">
             <div className="card-item">
               <span className="label">Ingresos</span>
-              <span className="value positive">{formatMoney(data?.mes?.ingresos || 0)}</span>
+              <span className="value positive" aria-label={`Ingresos mensuales: ${formatMoney(data?.mes?.ingresos || 0)}`}>{formatMoney(data?.mes?.ingresos || 0)}</span>
             </div>
             <div className="card-item">
               <span className="label">Gastos</span>
-              <span className="value negative">{formatMoney(data?.mes?.gastos || 0)}</span>
+              <span className="value negative" aria-label={`Gastos mensuales: ${formatMoney(data?.mes?.gastos || 0)}`}>{formatMoney(data?.mes?.gastos || 0)}</span>
             </div>
             <div className="card-item total">
               <span className="label">Balance</span>
-              <span className={`value ${(data?.mes?.balance || 0) >= 0 ? 'positive' : 'negative'}`}>
+              <span className={`value ${(data?.mes?.balance || 0) >= 0 ? 'positive' : 'negative'}`} aria-label={`Balance mensual: ${formatMoney(data?.mes?.balance || 0)}`}>
                 {formatMoney(data?.mes?.balance || 0)}
               </span>
             </div>
@@ -233,28 +233,28 @@ const Dashboard = () => {
 
       <div className="recent-movements">
         <h3>Últimos Movimientos</h3>
-        <div className="movements-list">
+        <div className="movements-list" role="list" aria-label="Últimos movimientos">
           {data?.ultimosIngresos?.map((ing, index) => (
-            <div key={`ing-${index}`} className="movement-item ingreso">
+            <div key={`ing-${index}`} className="movement-item ingreso" role="listitem">
               <div className="movement-info">
                 <span className="movement-type">+ Ingreso</span>
                 <span className="movement-date">{new Date(ing.fecha).toLocaleDateString('es-CO')}</span>
               </div>
               <div className="movement-right">
                 <span className="movement-amount positive">{formatMoney(ing.monto)}</span>
-                <button className="btn-delete" onClick={() => handleEliminar('ingreso', ing.id)} title="Eliminar">✕</button>
+                <button className="btn-delete" onClick={() => handleEliminar('ingreso', ing.id)} title="Eliminar ingreso" aria-label={`Eliminar ingreso de ${formatMoney(ing.monto)}`}>✕</button>
               </div>
             </div>
           ))}
           {data?.ultimosGastos?.map((gast, index) => (
-            <div key={`gast-${index}`} className="movement-item gasto">
+            <div key={`gast-${index}`} className="movement-item gasto" role="listitem">
               <div className="movement-info">
                 <span className="movement-type">- {gast.categoria_nombre}</span>
                 <span className="movement-date">{new Date(gast.fecha).toLocaleDateString('es-CO')}</span>
               </div>
               <div className="movement-right">
                 <span className="movement-amount negative">{formatMoney(gast.monto)}</span>
-                <button className="btn-delete" onClick={() => handleEliminar('gasto', gast.id)} title="Eliminar">✕</button>
+                <button className="btn-delete" onClick={() => handleEliminar('gasto', gast.id)} title={`Eliminar gasto de ${gast.categoria_nombre}`} aria-label={`Eliminar gasto de ${gast.categoria_nombre}: ${formatMoney(gast.monto)}`}>✕</button>
               </div>
             </div>
           ))}

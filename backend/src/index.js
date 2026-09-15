@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 process.on('uncaughtException', (err) => {
@@ -18,9 +20,24 @@ const dashboardRoutes = require('./routes/dashboard');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-console.log('DB_HOST:', process.env.DB_HOST);
-console.log('DB_PORT:', process.env.DB_PORT);
-console.log('DB_SSL:', process.env.DB_SSL);
+app.use(helmet());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiadas solicitudes. Intenta de nuevo más tarde.' }
+});
+app.use(limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiados intentos de login. Espera 15 minutos.' }
+});
 
 const corsOptions = {
   origin: process.env.FRONTEND_URL || '*',
@@ -29,9 +46,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/ingresos', ingresosRoutes);
 app.use('/api/gastos', gastosRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -45,6 +62,11 @@ app.get('/api/categorias-gasto', async (req, res) => {
     console.error('Error en categorias:', error.message);
     res.status(500).json({ message: 'Error del servidor.' });
   }
+});
+
+app.use((err, req, res, next) => {
+  console.error('Error no manejado:', err.message);
+  res.status(500).json({ message: 'Error del servidor.' });
 });
 
 app.get('/', (req, res) => {

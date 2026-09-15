@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
@@ -9,6 +9,11 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const emailRef = useRef(null);
+
+  useEffect(() => {
+    emailRef.current?.focus();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,18 +21,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 90000);
-
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeout);
-      const result = await res.json();
+      const result = await api.auth.login(email, password);
 
       if (result.token) {
         login(result.usuario, result.token);
@@ -35,11 +29,7 @@ const Login = () => {
         setError(result.message || 'Credenciales incorrectas');
       }
     } catch (err) {
-      if (err.name === 'AbortError') {
-        setError('El servidor tardó demasiado. Intenta de nuevo.');
-      } else {
-        setError('Error de conexión con el servidor');
-      }
+      setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
     }
@@ -53,30 +43,35 @@ const Login = () => {
           <p>Controla tus ingresos y gastos</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} aria-label="Formulario de inicio de sesión">
           <div className="form-group">
-            <label>Email</label>
+            <label htmlFor="email">Email</label>
             <input
+              ref={emailRef}
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
+              autoComplete="email"
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Contraseña</label>
+            <label htmlFor="password">Contraseña</label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              autoComplete="current-password"
               required
             />
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message" role="alert">{error}</div>}
 
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Cargando...' : 'Iniciar Sesión'}

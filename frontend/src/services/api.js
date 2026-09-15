@@ -15,36 +15,57 @@ const handleResponse = async (res) => {
     window.location.href = '/login';
     throw new Error('Sesión expirada');
   }
-  return res.json();
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || `Error ${res.status}`);
+  }
+
+  return data;
+};
+
+const request = async (url, options = {}) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeout);
+    return handleResponse(res);
+  } catch (err) {
+    clearTimeout(timeout);
+    if (err.name === 'AbortError') {
+      throw new Error('El servidor tardó demasiado. Intenta de nuevo.');
+    }
+    if (err.message === 'Sesión expirada') throw err;
+    throw new Error('Error de conexión con el servidor');
+  }
 };
 
 export const api = {
   auth: {
     login: async (email, password) => {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      return request(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      return handleResponse(res);
     },
     register: async (data) => {
-      const res = await fetch(`${API_URL}/auth/register`, {
+      return request(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      return handleResponse(res);
     }
   },
   dashboard: {
     getResumen: async () => {
-      const res = await fetch(`${API_URL}/dashboard`, { headers: getHeaders() });
-      return handleResponse(res);
+      return request(`${API_URL}/dashboard`, { headers: getHeaders() });
     },
     getDia: async (fecha) => {
-      const res = await fetch(`${API_URL}/dashboard/dia?fecha=${fecha}`, { headers: getHeaders() });
-      return handleResponse(res);
+      return request(`${API_URL}/dashboard/dia?fecha=${fecha}`, { headers: getHeaders() });
     }
   },
   ingresos: {
@@ -53,23 +74,20 @@ export const api = {
       if (fechaInicio && fechaFin) {
         url += `?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
       }
-      const res = await fetch(url, { headers: getHeaders() });
-      return handleResponse(res);
+      return request(url, { headers: getHeaders() });
     },
     crear: async (data) => {
-      const res = await fetch(`${API_URL}/ingresos`, {
+      return request(`${API_URL}/ingresos`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify(data)
       });
-      return handleResponse(res);
     },
     eliminar: async (id) => {
-      const res = await fetch(`${API_URL}/ingresos/${id}`, {
+      return request(`${API_URL}/ingresos/${id}`, {
         method: 'DELETE',
         headers: getHeaders()
       });
-      return handleResponse(res);
     }
   },
   gastos: {
@@ -78,29 +96,25 @@ export const api = {
       if (fechaInicio && fechaFin) {
         url += `?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
       }
-      const res = await fetch(url, { headers: getHeaders() });
-      return handleResponse(res);
+      return request(url, { headers: getHeaders() });
     },
     crear: async (data) => {
-      const res = await fetch(`${API_URL}/gastos`, {
+      return request(`${API_URL}/gastos`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify(data)
       });
-      return handleResponse(res);
     },
     eliminar: async (id) => {
-      const res = await fetch(`${API_URL}/gastos/${id}`, {
+      return request(`${API_URL}/gastos/${id}`, {
         method: 'DELETE',
         headers: getHeaders()
       });
-      return handleResponse(res);
     }
   },
   categorias: {
     listar: async () => {
-      const res = await fetch(`${API_URL}/categorias-gasto`, { headers: getHeaders() });
-      return handleResponse(res);
+      return request(`${API_URL}/categorias-gasto`, { headers: getHeaders() });
     }
   }
 };
