@@ -17,10 +17,15 @@ const Navbar = () => {
 
   if (!user) return null;
 
+  const initials = user.nombre?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+
   return (
     <nav className="navbar">
       <div className="nav-brand">
-        <Link to="/">🚗 Finanzas</Link>
+        <Link to="/">
+          <span className="nav-brand-icon">🚗</span>
+          Finanzas
+        </Link>
       </div>
       <div className="nav-links">
         <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Dashboard</Link>
@@ -28,8 +33,32 @@ const Navbar = () => {
         <Link to="/gasto" className={location.pathname === '/gasto' ? 'active' : ''}>Gasto</Link>
       </div>
       <div className="nav-user">
-        <span>{user.nombre}</span>
+        <div className="nav-avatar">{initials}</div>
+        <span className="nav-user-name">{user.nombre}</span>
         <button onClick={logout} className="btn-logout">Salir</button>
+      </div>
+    </nav>
+  );
+};
+
+const BottomNav = () => {
+  const location = useLocation();
+
+  return (
+    <nav className="bottom-nav">
+      <div className="bottom-nav-inner">
+        <Link to="/" className={`bottom-nav-item ${location.pathname === '/' ? 'active' : ''}`}>
+          <span className="bottom-nav-icon">📊</span>
+          Dashboard
+        </Link>
+        <Link to="/ingreso" className={`bottom-nav-item ${location.pathname === '/ingreso' ? 'active' : ''}`}>
+          <span className="bottom-nav-icon">💰</span>
+          Ingreso
+        </Link>
+        <Link to="/gasto" className={`bottom-nav-item ${location.pathname === '/gasto' ? 'active' : ''}`}>
+          <span className="bottom-nav-icon">💸</span>
+          Gasto
+        </Link>
       </div>
     </nav>
   );
@@ -50,6 +79,7 @@ const AppContent = () => {
           <Route path="/gasto" element={<PrivateRoute><RegistrarGasto /></PrivateRoute>} />
         </Routes>
       </div>
+      {token && <BottomNav />}
     </>
   );
 };

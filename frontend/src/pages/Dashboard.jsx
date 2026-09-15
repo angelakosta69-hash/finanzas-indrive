@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+
+const MovementIcon = ({ tipo, categoria }) => {
+  if (tipo === 'ingreso') return <div className="movement-icon ingreso">💰</div>;
+  const icons = { gasolina: '⛽', recarga: '📱', mantenimiento: '🔧' };
+  return <div className="movement-icon gasto">{icons[categoria] || '💸'}</div>;
+};
+
+const CategoryIcon = ({ nombre }) => {
+  const icons = { gasolina: '⛽', recarga: '📱', mantenimiento: '🔧' };
+  const cls = nombre === 'gasolina' ? 'gasolina' : nombre === 'recarga' ? 'recarga' : nombre === 'mantenimiento' ? 'mantenimiento' : 'default';
+  return <div className={`cat-icon ${cls}`}>{icons[nombre] || '💵'}</div>;
+};
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
@@ -77,7 +90,21 @@ const Dashboard = () => {
     });
   };
 
-  if (loading) return <div className="loading">Cargando...</div>;
+  const hasData = data && (
+    (data.ultimosIngresos?.length > 0) ||
+    (data.ultimosGastos?.length > 0) ||
+    (data.hoy?.ingresos > 0) ||
+    (data.hoy?.gastos > 0)
+  );
+
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="loading-spinner"></div>
+        <span>Cargando tus finanzas...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard">
@@ -86,19 +113,20 @@ const Dashboard = () => {
 
       <div className="cards-grid" role="region" aria-label="Resumen financiero">
         <div className="card card-ingreso">
+          <div className="card-icon">📊</div>
           <h3>Hoy</h3>
           <div className="card-content">
             <div className="card-item">
               <span className="label">Ingresos</span>
-              <span className="value positive" aria-label={`Ingresos de hoy: ${formatMoney(data?.hoy?.ingresos || 0)}`}>{formatMoney(data?.hoy?.ingresos || 0)}</span>
+              <span className="value positive">{formatMoney(data?.hoy?.ingresos || 0)}</span>
             </div>
             <div className="card-item">
               <span className="label">Gastos</span>
-              <span className="value negative" aria-label={`Gastos de hoy: ${formatMoney(data?.hoy?.gastos || 0)}`}>{formatMoney(data?.hoy?.gastos || 0)}</span>
+              <span className="value negative">{formatMoney(data?.hoy?.gastos || 0)}</span>
             </div>
             <div className="card-item total">
               <span className="label">Balance</span>
-              <span className={`value ${(data?.hoy?.balance || 0) >= 0 ? 'positive' : 'negative'}`} aria-label={`Balance de hoy: ${formatMoney(data?.hoy?.balance || 0)}`}>
+              <span className={`value ${(data?.hoy?.balance || 0) >= 0 ? 'positive' : 'negative'}`}>
                 {formatMoney(data?.hoy?.balance || 0)}
               </span>
             </div>
@@ -106,19 +134,20 @@ const Dashboard = () => {
         </div>
 
         <div className="card card-semana">
+          <div className="card-icon">📅</div>
           <h3>Esta Semana</h3>
           <div className="card-content">
             <div className="card-item">
               <span className="label">Ingresos</span>
-              <span className="value positive" aria-label={`Ingresos semanales: ${formatMoney(data?.semana?.ingresos || 0)}`}>{formatMoney(data?.semana?.ingresos || 0)}</span>
+              <span className="value positive">{formatMoney(data?.semana?.ingresos || 0)}</span>
             </div>
             <div className="card-item">
               <span className="label">Gastos</span>
-              <span className="value negative" aria-label={`Gastos semanales: ${formatMoney(data?.semana?.gastos || 0)}`}>{formatMoney(data?.semana?.gastos || 0)}</span>
+              <span className="value negative">{formatMoney(data?.semana?.gastos || 0)}</span>
             </div>
             <div className="card-item total">
               <span className="label">Balance</span>
-              <span className={`value ${(data?.semana?.balance || 0) >= 0 ? 'positive' : 'negative'}`} aria-label={`Balance semanal: ${formatMoney(data?.semana?.balance || 0)}`}>
+              <span className={`value ${(data?.semana?.balance || 0) >= 0 ? 'positive' : 'negative'}`}>
                 {formatMoney(data?.semana?.balance || 0)}
               </span>
             </div>
@@ -126,19 +155,20 @@ const Dashboard = () => {
         </div>
 
         <div className="card card-mes">
+          <div className="card-icon">📆</div>
           <h3>Este Mes</h3>
           <div className="card-content">
             <div className="card-item">
               <span className="label">Ingresos</span>
-              <span className="value positive" aria-label={`Ingresos mensuales: ${formatMoney(data?.mes?.ingresos || 0)}`}>{formatMoney(data?.mes?.ingresos || 0)}</span>
+              <span className="value positive">{formatMoney(data?.mes?.ingresos || 0)}</span>
             </div>
             <div className="card-item">
               <span className="label">Gastos</span>
-              <span className="value negative" aria-label={`Gastos mensuales: ${formatMoney(data?.mes?.gastos || 0)}`}>{formatMoney(data?.mes?.gastos || 0)}</span>
+              <span className="value negative">{formatMoney(data?.mes?.gastos || 0)}</span>
             </div>
             <div className="card-item total">
               <span className="label">Balance</span>
-              <span className={`value ${(data?.mes?.balance || 0) >= 0 ? 'positive' : 'negative'}`} aria-label={`Balance mensual: ${formatMoney(data?.mes?.balance || 0)}`}>
+              <span className={`value ${(data?.mes?.balance || 0) >= 0 ? 'positive' : 'negative'}`}>
                 {formatMoney(data?.mes?.balance || 0)}
               </span>
             </div>
@@ -158,7 +188,9 @@ const Dashboard = () => {
         </div>
 
         {loadingDay ? (
-          <div className="loading-day">Cargando...</div>
+          <div className="loading-day">
+            <div className="loading-spinner"></div>
+          </div>
         ) : dayData ? (
           <div className="day-detail">
             <p className="day-label">{formatDateLabel(dayData.fecha)}</p>
@@ -184,12 +216,15 @@ const Dashboard = () => {
               <div className="day-movements">
                 <h4>Ingresos</h4>
                 {dayData.ingresos.detalle.map((ing, i) => (
-                  <div key={`ing-${i}`} className="movement-item ingreso">
-                    <div className="movement-info">
-                      <span className="movement-type">+ Ingreso</span>
-                      {ing.observaciones && <span className="movement-desc">{ing.observaciones}</span>}
+                  <div key={`ing-${i}`} className="movement-item">
+                    <div className="movement-left">
+                      <MovementIcon tipo="ingreso" />
+                      <div className="movement-info">
+                        <span className="movement-type">Ingreso</span>
+                        {ing.observaciones && <span className="movement-desc">{ing.observaciones}</span>}
+                      </div>
                     </div>
-                    <span className="movement-amount positive">{formatMoney(ing.monto)}</span>
+                    <span className="movement-amount positive">+{formatMoney(ing.monto)}</span>
                   </div>
                 ))}
               </div>
@@ -199,19 +234,25 @@ const Dashboard = () => {
               <div className="day-movements">
                 <h4>Gastos</h4>
                 {dayData.gastos.detalle.map((gast, i) => (
-                  <div key={`gast-${i}`} className="movement-item gasto">
-                    <div className="movement-info">
-                      <span className="movement-type">- {gast.categoria_nombre}</span>
-                      {gast.descripcion && <span className="movement-desc">{gast.descripcion}</span>}
+                  <div key={`gast-${i}`} className="movement-item">
+                    <div className="movement-left">
+                      <MovementIcon tipo="gasto" categoria={gast.categoria_nombre} />
+                      <div className="movement-info">
+                        <span className="movement-type">{gast.categoria_nombre}</span>
+                        {gast.descripcion && <span className="movement-desc">{gast.descripcion}</span>}
+                      </div>
                     </div>
-                    <span className="movement-amount negative">{formatMoney(gast.monto)}</span>
+                    <span className="movement-amount negative">-{formatMoney(gast.monto)}</span>
                   </div>
                 ))}
               </div>
             )}
 
             {dayData.ingresos.detalle.length === 0 && dayData.gastos.detalle.length === 0 && (
-              <p className="no-data">No hay movimientos este día</p>
+              <div className="no-data">
+                <div className="no-data-icon">📭</div>
+                <p>No hay movimientos este día</p>
+              </div>
             )}
           </div>
         ) : null}
@@ -222,44 +263,71 @@ const Dashboard = () => {
         <div className="categoria-list">
           {data?.gastosPorCategoria?.map((cat, index) => (
             <div key={index} className="categoria-item">
-              <span className="cat-name">
-                {cat.nombre === 'gasolina' ? '⛽' : cat.nombre === 'recarga' ? '📱' : '🔧'} {cat.nombre}
-              </span>
+              <div className="cat-info">
+                <CategoryIcon nombre={cat.nombre} />
+                <span className="cat-name">{cat.nombre}</span>
+              </div>
               <span className="cat-total">{formatMoney(cat.total)}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="recent-movements">
-        <h3>Últimos Movimientos</h3>
-        <div className="movements-list" role="list" aria-label="Últimos movimientos">
-          {data?.ultimosIngresos?.map((ing, index) => (
-            <div key={`ing-${index}`} className="movement-item ingreso" role="listitem">
-              <div className="movement-info">
-                <span className="movement-type">+ Ingreso</span>
-                <span className="movement-date">{new Date(ing.fecha).toLocaleDateString('es-CO')}</span>
-              </div>
-              <div className="movement-right">
-                <span className="movement-amount positive">{formatMoney(ing.monto)}</span>
-                <button className="btn-delete" onClick={() => handleEliminar('ingreso', ing.id)} title="Eliminar ingreso" aria-label={`Eliminar ingreso de ${formatMoney(ing.monto)}`}>✕</button>
-              </div>
-            </div>
-          ))}
-          {data?.ultimosGastos?.map((gast, index) => (
-            <div key={`gast-${index}`} className="movement-item gasto" role="listitem">
-              <div className="movement-info">
-                <span className="movement-type">- {gast.categoria_nombre}</span>
-                <span className="movement-date">{new Date(gast.fecha).toLocaleDateString('es-CO')}</span>
-              </div>
-              <div className="movement-right">
-                <span className="movement-amount negative">{formatMoney(gast.monto)}</span>
-                <button className="btn-delete" onClick={() => handleEliminar('gasto', gast.id)} title={`Eliminar gasto de ${gast.categoria_nombre}`} aria-label={`Eliminar gasto de ${gast.categoria_nombre}: ${formatMoney(gast.monto)}`}>✕</button>
-              </div>
-            </div>
-          ))}
+      {!hasData ? (
+        <div className="recent-movements" style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <div style={{ fontSize: '64px', marginBottom: '16px', animation: 'float 3s ease-in-out infinite' }}>🚗</div>
+          <h3 style={{ marginBottom: '8px', fontSize: '18px' }}>Empieza a controlar tus finanzas</h3>
+          <p style={{ color: 'var(--text-gray)', marginBottom: '24px', fontSize: '14px' }}>
+            Registra tu primer ingreso o gasto para ver tu resumen aquí
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/ingreso" className="btn-primary" style={{ width: 'auto', padding: '14px 28px', textDecoration: 'none', display: 'inline-block' }}>
+              💰 Registrar Ingreso
+            </Link>
+            <Link to="/gasto" className="btn-primary btn-gasto" style={{ width: 'auto', padding: '14px 28px', textDecoration: 'none', display: 'inline-block' }}>
+              💸 Registrar Gasto
+            </Link>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="recent-movements">
+          <h3>Últimos Movimientos</h3>
+          <div className="movements-list" role="list" aria-label="Últimos movimientos">
+            {data?.ultimosIngresos?.map((ing, index) => (
+              <div key={`ing-${index}`} className="movement-item" role="listitem" style={{ animationDelay: `${index * 0.05}s` }}>
+                <div className="movement-left">
+                  <MovementIcon tipo="ingreso" />
+                  <div className="movement-info">
+                    <span className="movement-type">Ingreso</span>
+                    <span className="movement-date">{new Date(ing.fecha).toLocaleDateString('es-CO')}</span>
+                    {ing.observaciones && <span className="movement-desc">{ing.observaciones}</span>}
+                  </div>
+                </div>
+                <div className="movement-right">
+                  <span className="movement-amount positive">+{formatMoney(ing.monto)}</span>
+                  <button className="btn-delete" onClick={() => handleEliminar('ingreso', ing.id)} title="Eliminar ingreso" aria-label={`Eliminar ingreso de ${formatMoney(ing.monto)}`}>✕</button>
+                </div>
+              </div>
+            ))}
+            {data?.ultimosGastos?.map((gast, index) => (
+              <div key={`gast-${index}`} className="movement-item" role="listitem" style={{ animationDelay: `${(data?.ultimosIngresos?.length || 0 + index) * 0.05}s` }}>
+                <div className="movement-left">
+                  <MovementIcon tipo="gasto" categoria={gast.categoria_nombre} />
+                  <div className="movement-info">
+                    <span className="movement-type">{gast.categoria_nombre}</span>
+                    <span className="movement-date">{new Date(gast.fecha).toLocaleDateString('es-CO')}</span>
+                    {gast.descripcion && <span className="movement-desc">{gast.descripcion}</span>}
+                  </div>
+                </div>
+                <div className="movement-right">
+                  <span className="movement-amount negative">-{formatMoney(gast.monto)}</span>
+                  <button className="btn-delete" onClick={() => handleEliminar('gasto', gast.id)} title={`Eliminar gasto de ${gast.categoria_nombre}`} aria-label={`Eliminar gasto de ${gast.categoria_nombre}: ${formatMoney(gast.monto)}`}>✕</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

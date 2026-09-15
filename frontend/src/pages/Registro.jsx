@@ -117,7 +117,7 @@ const Registro = () => {
           {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Creando cuenta...' : 'Registrarse'}
+            {loading ? <span className="spinner"></span> : 'Registrarse'}
           </button>
         </form>
 

@@ -142,7 +142,7 @@ const RegistrarGasto = ({ onSuccess }) => {
         {message && <div className={`message ${message.includes('exitosamente') ? 'success' : 'error'}`}>{message}</div>}
 
         <button type="submit" className="btn-primary btn-gasto" disabled={loading || !categoriaId}>
-          {loading ? 'Guardando...' : 'Registrar Gasto'}
+          {loading ? <span className="spinner"></span> : 'Registrar Gasto'}
         </button>
       </form>
     </div>

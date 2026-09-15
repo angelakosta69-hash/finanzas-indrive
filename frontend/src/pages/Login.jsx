@@ -74,7 +74,7 @@ const Login = () => {
           {error && <div className="error-message" role="alert">{error}</div>}
 
           <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Cargando...' : 'Iniciar Sesión'}
+            {loading ? <span className="spinner"></span> : 'Iniciar Sesión'}
           </button>
         </form>
 

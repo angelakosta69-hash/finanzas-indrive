@@ -89,7 +89,7 @@ const RegistrarIngreso = ({ onSuccess }) => {
         {message && <div className={`message ${message.includes('exitosamente') ? 'success' : 'error'}`}>{message}</div>}
 
         <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? 'Guardando...' : 'Registrar Ingreso'}
+          {loading ? <span className="spinner"></span> : 'Registrar Ingreso'}
         </button>
       </form>
     </div>
