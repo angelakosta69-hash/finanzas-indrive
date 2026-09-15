@@ -82,10 +82,6 @@ const TopBar = () => {
 
   return (
     <header className="topbar">
-      <div className="topbar-search">
-        <span className="topbar-search-icon">🔍</span>
-        <input type="text" placeholder="Buscar..." className="topbar-search-input" />
-      </div>
       <div className="topbar-right">
         <button className="topbar-notification" aria-label="Notificaciones">
           🔔

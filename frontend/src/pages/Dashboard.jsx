@@ -1,8 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Sparkline = ({ data, color }) => {
+  const [animated, setAnimated] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setAnimated(true); },
+      { threshold: 0.3 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
   if (!data || data.length === 0) return null;
   const max = Math.max(...data);
   const min = Math.min(...data);
@@ -15,15 +27,28 @@ const Sparkline = ({ data, color }) => {
     return `${x},${y}`;
   }).join(' ');
 
+  const pathLength = width * 2;
+
   return (
-    <svg width={width} height={height} className="sparkline">
+    <svg ref={ref} width={width} height={height} className="sparkline">
+      <defs>
+        <linearGradient id={`grad-${color.replace('#', '')}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={color} stopOpacity="1" />
+        </linearGradient>
+      </defs>
       <polyline
         fill="none"
-        stroke={color}
-        strokeWidth="2"
+        stroke={`url(#grad-${color.replace('#', '')})`}
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
         points={points}
+        style={{
+          strokeDasharray: pathLength,
+          strokeDashoffset: animated ? 0 : pathLength,
+          transition: 'stroke-dashoffset 1.5s ease-out'
+        }}
       />
     </svg>
   );
@@ -272,7 +297,10 @@ const Dashboard = () => {
                           {ing.observaciones && <span className="movement-desc">{ing.observaciones}</span>}
                         </div>
                       </div>
-                      <span className="movement-amount positive">+{formatMoney(ing.monto)}</span>
+                      <div className="movement-right">
+                        <span className="movement-amount positive">+{formatMoney(ing.monto)}</span>
+                        <button className="btn-delete" onClick={() => handleEliminar('ingreso', ing.id)} title="Eliminar" aria-label={`Eliminar ingreso de ${formatMoney(ing.monto)}`}>✕</button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -292,7 +320,10 @@ const Dashboard = () => {
                           {gast.descripcion && <span className="movement-desc">{gast.descripcion}</span>}
                         </div>
                       </div>
-                      <span className="movement-amount negative">-{formatMoney(gast.monto)}</span>
+                      <div className="movement-right">
+                        <span className="movement-amount negative">-{formatMoney(gast.monto)}</span>
+                        <button className="btn-delete" onClick={() => handleEliminar('gasto', gast.id)} title="Eliminar" aria-label={`Eliminar gasto de ${gast.categoria_nombre}: ${formatMoney(gast.monto)}`}>✕</button>
+                      </div>
                     </div>
                   ))}
                 </div>
