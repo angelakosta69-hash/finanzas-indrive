@@ -132,4 +132,75 @@ const dia = async (req, res) => {
   }
 };
 
-module.exports = { resumen, dia };
+const historialMensual = async (req, res) => {
+  try {
+    const usuario_id = req.usuario.id;
+
+    const [meses] = await pool.query(`
+      SELECT 
+        DATE_FORMAT(fecha, '%Y-%m') as mes,
+        DATE_FORMAT(fecha, '%Y-%m-01') as fecha_mes,
+        SUM(monto) as total
+      FROM ingresos
+      WHERE usuario_id = ?
+      GROUP BY DATE_FORMAT(fecha, '%Y-%m')
+      ORDER BY mes DESC
+    `, [usuario_id]);
+
+    const [gastosMes] = await pool.query(`
+      SELECT 
+        DATE_FORMAT(fecha, '%Y-%m') as mes,
+        DATE_FORMAT(fecha, '%Y-%m-01') as fecha_mes,
+        SUM(monto) as total
+      FROM gastos
+      WHERE usuario_id = ?
+      GROUP BY DATE_FORMAT(fecha, '%Y-%m')
+      ORDER BY mes DESC
+    `, [usuario_id]);
+
+    const [gastosPorCatMes] = await pool.query(`
+      SELECT 
+        DATE_FORMAT(g.fecha, '%Y-%m') as mes,
+        cg.nombre as categoria,
+        SUM(g.monto) as total
+      FROM gastos g
+      JOIN categorias_gasto cg ON g.categoria_id = cg.id
+      WHERE g.usuario_id = ?
+      GROUP BY DATE_FORMAT(g.fecha, '%Y-%m'), cg.nombre
+      ORDER BY mes DESC
+    `, [usuario_id]);
+
+    const mapaIngresos = {};
+    meses.forEach(m => { mapaIngresos[m.mes] = parseFloat(m.total); });
+
+    const mapaGastos = {};
+    gastosMes.forEach(g => { mapaGastos[g.mes] = parseFloat(g.total); });
+
+    const mapaCats = {};
+    gastosPorCatMes.forEach(gc => {
+      if (!mapaCats[gc.mes]) mapaCats[gc.mes] = {};
+      mapaCats[gc.mes][gc.categoria] = parseFloat(gc.total);
+    });
+
+    const todosLosMeses = [...new Set([...Object.keys(mapaIngresos), ...Object.keys(mapaGastos)])].sort();
+
+    const historial = todosLosMeses.map(mes => {
+      const ing = mapaIngresos[mes] || 0;
+      const gas = mapaGastos[mes] || 0;
+      return {
+        mes,
+        ingresos: ing,
+        gastos: gas,
+        balance: ing - gas,
+        categorias: mapaCats[mes] || {}
+      };
+    });
+
+    res.json({ historial });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+module.exports = { resumen, dia, historialMensual };
