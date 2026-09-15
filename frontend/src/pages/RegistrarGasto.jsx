@@ -18,6 +18,9 @@ const RegistrarGasto = ({ onSuccess }) => {
   const [descripcion, setDescripcion] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [lastId, setLastId] = useState(null);
+  const [lastMonto, setLastMonto] = useState('');
+  const [lastCategoria, setLastCategoria] = useState('');
 
   useEffect(() => {
     loadCategorias();
@@ -44,6 +47,25 @@ const RegistrarGasto = ({ onSuccess }) => {
     setMonto(formatMonto(raw));
   };
 
+  const handleClearMonto = () => setMonto('');
+  const handleClearDescripcion = () => setDescripcion('');
+
+  const handleEliminarUltimo = async () => {
+    if (!lastId) return;
+    if (!confirm('¿Eliminar este gasto?')) return;
+
+    try {
+      await api.gastos.eliminar(lastId);
+      setMessage('Gasto eliminado');
+      setLastId(null);
+      setLastMonto('');
+      setLastCategoria('');
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      setMessage('Error al eliminar');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -58,6 +80,9 @@ const RegistrarGasto = ({ onSuccess }) => {
       });
 
       if (result.id) {
+        setLastId(result.id);
+        setLastMonto(monto);
+        setLastCategoria(getCategoriaNombre());
         setMessage('Gasto registrado exitosamente');
         setMonto('');
         setDescripcion('');
@@ -107,14 +132,19 @@ const RegistrarGasto = ({ onSuccess }) => {
 
         <div className="form-group">
           <label>Monto ($)</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={monto}
-            onChange={handleMontoChange}
-            placeholder="0"
-            required
-          />
+          <div className="input-with-clear">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={monto}
+              onChange={handleMontoChange}
+              placeholder="0"
+              required
+            />
+            {monto && (
+              <button type="button" className="btn-clear-input" onClick={handleClearMonto} title="Borrar monto">✕</button>
+            )}
+          </div>
         </div>
 
         <div className="form-group">
@@ -130,16 +160,28 @@ const RegistrarGasto = ({ onSuccess }) => {
         {esMantenimiento && (
           <div className="form-group">
             <label>Descripción</label>
-            <textarea
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-              placeholder="Ej: aceite, filtro, mano de obra..."
-              rows="3"
-            />
+            <div className="input-with-clear">
+              <textarea
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                placeholder="Ej: aceite, filtro, mano de obra..."
+                rows="3"
+              />
+              {descripcion && (
+                <button type="button" className="btn-clear-input btn-clear-textarea" onClick={handleClearDescripcion} title="Borrar descripción">✕</button>
+              )}
+            </div>
           </div>
         )}
 
         {message && <div className={`message ${message.includes('exitosamente') ? 'success' : 'error'}`}>{message}</div>}
+
+        {lastId && (
+          <div className="last-entry">
+            <span>Último: ${lastMonto} ({lastCategoria})</span>
+            <button type="button" className="btn-undo" onClick={handleEliminarUltimo}>↩ Deshacer</button>
+          </div>
+        )}
 
         <button type="submit" className="btn-primary btn-gasto" disabled={loading || !categoriaId}>
           {loading ? <span className="spinner"></span> : 'Registrar Gasto'}

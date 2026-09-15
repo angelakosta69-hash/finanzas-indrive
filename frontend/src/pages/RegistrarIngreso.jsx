@@ -16,10 +16,30 @@ const RegistrarIngreso = ({ onSuccess }) => {
   const [observaciones, setObservaciones] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [lastId, setLastId] = useState(null);
+  const [lastMonto, setLastMonto] = useState('');
 
   const handleMontoChange = (e) => {
     const raw = parseMonto(e.target.value);
     setMonto(formatMonto(raw));
+  };
+
+  const handleClearMonto = () => setMonto('');
+  const handleClearObservaciones = () => setObservaciones('');
+
+  const handleEliminarUltimo = async () => {
+    if (!lastId) return;
+    if (!confirm('¿Eliminar este ingreso?')) return;
+
+    try {
+      await api.ingresos.eliminar(lastId);
+      setMessage('Ingreso eliminado');
+      setLastId(null);
+      setLastMonto('');
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      setMessage('Error al eliminar');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -35,6 +55,8 @@ const RegistrarIngreso = ({ onSuccess }) => {
       });
 
       if (result.id) {
+        setLastId(result.id);
+        setLastMonto(monto);
         setMessage('Ingreso registrado exitosamente');
         setMonto('');
         setObservaciones('');
@@ -56,14 +78,19 @@ const RegistrarIngreso = ({ onSuccess }) => {
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Monto ($)</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={monto}
-            onChange={handleMontoChange}
-            placeholder="0"
-            required
-          />
+          <div className="input-with-clear">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={monto}
+              onChange={handleMontoChange}
+              placeholder="0"
+              required
+            />
+            {monto && (
+              <button type="button" className="btn-clear-input" onClick={handleClearMonto} title="Borrar monto">✕</button>
+            )}
+          </div>
         </div>
 
         <div className="form-group">
@@ -78,15 +105,27 @@ const RegistrarIngreso = ({ onSuccess }) => {
 
         <div className="form-group">
           <label>Observaciones (opcional)</label>
-          <textarea
-            value={observaciones}
-            onChange={(e) => setObservaciones(e.target.value)}
-            placeholder="Ej: Viaje al centro, carrera larga..."
-            rows="3"
-          />
+          <div className="input-with-clear">
+            <textarea
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              placeholder="Ej: Viaje al centro, carrera larga..."
+              rows="3"
+            />
+            {observaciones && (
+              <button type="button" className="btn-clear-input btn-clear-textarea" onClick={handleClearObservaciones} title="Borrar observación">✕</button>
+            )}
+          </div>
         </div>
 
         {message && <div className={`message ${message.includes('exitosamente') ? 'success' : 'error'}`}>{message}</div>}
+
+        {lastId && (
+          <div className="last-entry">
+            <span>Último: ${lastMonto}</span>
+            <button type="button" className="btn-undo" onClick={handleEliminarUltimo}>↩ Deshacer</button>
+          </div>
+        )}
 
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? <span className="spinner"></span> : 'Registrar Ingreso'}

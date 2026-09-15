@@ -913,6 +913,80 @@ body {
   font-family: inherit;
 }
 
+/* Input with clear button */
+.input-with-clear {
+  position: relative;
+}
+
+.input-with-clear input,
+.input-with-clear textarea {
+  width: 100%;
+}
+
+.btn-clear-input {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-clear-input:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-clear-textarea {
+  top: 16px;
+  transform: none;
+}
+
+/* Last entry undo */
+.last-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  font-size: 13px;
+  animation: fadeIn 0.3s ease;
+}
+
+.last-entry span {
+  color: var(--text-gray);
+}
+
+.btn-undo {
+  background: none;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  color: var(--primary);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-undo:hover {
+  background: var(--primary);
+  color: white;
+}
+
 .btn-primary {
   width: 100%;
   padding: 16px;
