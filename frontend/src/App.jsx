@@ -5,6 +5,7 @@ import Registro from './pages/Registro';
 import Dashboard from './pages/Dashboard';
 import RegistrarIngreso from './pages/RegistrarIngreso';
 import RegistrarGasto from './pages/RegistrarGasto';
+import Reportes from './pages/Reportes';
 
 const PrivateRoute = ({ children }) => {
   const { token } = useAuth();
@@ -18,6 +19,7 @@ const Sidebar = () => {
     { path: '/', icon: '📊', label: 'Panel' },
     { path: '/ingreso', icon: '💰', label: 'Ingreso' },
     { path: '/gasto', icon: '💸', label: 'Gasto' },
+    { path: '/reportes', icon: '📈', label: 'Reportes' },
   ];
 
   return (
@@ -60,6 +62,7 @@ const MobileHeader = () => {
   const getTitle = () => {
     if (location.pathname === '/ingreso') return '💰 Ingreso';
     if (location.pathname === '/gasto') return '💸 Gasto';
+    if (location.pathname === '/reportes') return '📈 Reportes';
     return '📊 Panel';
   };
 
@@ -114,6 +117,10 @@ const MobileNav = () => {
         <span className="mobile-nav-icon">💸</span>
         <span className="mobile-nav-label">Gasto</span>
       </Link>
+      <Link to="/reportes" className={`mobile-nav-item ${location.pathname === '/reportes' ? 'active' : ''}`}>
+        <span className="mobile-nav-icon">📈</span>
+        <span className="mobile-nav-label">Reportes</span>
+      </Link>
     </nav>
   );
 };
@@ -142,6 +149,7 @@ const AppContent = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/ingreso" element={<RegistrarIngreso />} />
             <Route path="/gasto" element={<RegistrarGasto />} />
+            <Route path="/reportes" element={<Reportes />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>

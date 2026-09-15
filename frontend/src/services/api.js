@@ -66,6 +66,9 @@ export const api = {
     },
     getDia: async (fecha) => {
       return request(`${API_URL}/dashboard/dia?fecha=${fecha}`, { headers: getHeaders() });
+    },
+    getHistorial: async () => {
+      return request(`${API_URL}/dashboard/historial`, { headers: getHeaders() });
     }
   },
   ingresos: {
