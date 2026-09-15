@@ -12,7 +12,6 @@ const PrivateRoute = ({ children }) => {
 };
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
   const location = useLocation();
 
   const menuItems = [
@@ -54,6 +53,29 @@ const Sidebar = () => {
   );
 };
 
+const MobileHeader = () => {
+  const { logout } = useAuth();
+  const location = useLocation();
+
+  const getTitle = () => {
+    if (location.pathname === '/ingreso') return '💰 Ingreso';
+    if (location.pathname === '/gasto') return '💸 Gasto';
+    return '📊 Panel';
+  };
+
+  return (
+    <header className="mobile-header">
+      <div className="mobile-header-left">
+        <span className="mobile-header-brand">📈</span>
+        <span className="mobile-header-title">{getTitle()}</span>
+      </div>
+      <button onClick={logout} className="mobile-header-logout" title="Cerrar sesión">
+        Salir
+      </button>
+    </header>
+  );
+};
+
 const TopBar = () => {
   const { user, logout } = useAuth();
   const initials = user?.nombre?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
@@ -79,6 +101,27 @@ const TopBar = () => {
   );
 };
 
+const MobileNav = () => {
+  const location = useLocation();
+
+  return (
+    <nav className="mobile-nav">
+      <Link to="/" className={`mobile-nav-item ${location.pathname === '/' ? 'active' : ''}`}>
+        <span className="mobile-nav-icon">📊</span>
+        <span className="mobile-nav-label">Panel</span>
+      </Link>
+      <Link to="/ingreso" className={`mobile-nav-item ${location.pathname === '/ingreso' ? 'active' : ''}`}>
+        <span className="mobile-nav-icon">💰</span>
+        <span className="mobile-nav-label">Ingreso</span>
+      </Link>
+      <Link to="/gasto" className={`mobile-nav-item ${location.pathname === '/gasto' ? 'active' : ''}`}>
+        <span className="mobile-nav-icon">💸</span>
+        <span className="mobile-nav-label">Gasto</span>
+      </Link>
+    </nav>
+  );
+};
+
 const AppContent = () => {
   const { token } = useAuth();
 
@@ -97,6 +140,7 @@ const AppContent = () => {
       <Sidebar />
       <div className="app-main">
         <TopBar />
+        <MobileHeader />
         <main className="app-content">
           <Routes>
             <Route path="/" element={<Dashboard />} />
@@ -106,6 +150,7 @@ const AppContent = () => {
           </Routes>
         </main>
       </div>
+      <MobileNav />
     </div>
   );
 };
