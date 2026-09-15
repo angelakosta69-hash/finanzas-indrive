@@ -11,52 +11,102 @@ const PrivateRoute = ({ children }) => {
   return token ? children : <Navigate to="/login" />;
 };
 
-const Navbar = () => {
+const Sidebar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
 
-  if (!user) return null;
-
-  const initials = user.nombre?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+  const menuItems = [
+    { path: '/', icon: '📊', label: 'Panel' },
+    { path: '/ingreso', icon: '💰', label: 'Ingreso' },
+    { path: '/gasto', icon: '💸', label: 'Gasto' },
+  ];
 
   return (
-    <nav className="navbar">
-      <div className="nav-brand">
-        <Link to="/">
-          <span className="nav-brand-icon">🚗</span>
-          Finanzas
-        </Link>
+    <aside className="sidebar">
+      <div className="sidebar-top">
+        <div className="sidebar-brand">
+          <span className="sidebar-brand-icon">📈</span>
+          <span className="sidebar-brand-text">Finanzas</span>
+        </div>
+
+        <nav className="sidebar-nav">
+          {menuItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`sidebar-nav-item ${location.pathname === item.path ? 'active' : ''}`}
+            >
+              <span className="sidebar-nav-icon">{item.icon}</span>
+              <span className="sidebar-nav-label">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
       </div>
-      <div className="nav-links">
-        <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Dashboard</Link>
-        <Link to="/ingreso" className={location.pathname === '/ingreso' ? 'active' : ''}>Ingreso</Link>
-        <Link to="/gasto" className={location.pathname === '/gasto' ? 'active' : ''}>Gasto</Link>
+
+      <div className="sidebar-bottom">
+        <div className="sidebar-motivation">
+          <div className="sidebar-motivation-icon">📈</div>
+          <p className="sidebar-motivation-text">Pequeños hábitos, grandes resultados</p>
+          <div className="sidebar-motivation-bar"></div>
+        </div>
       </div>
-      <div className="nav-user">
-        <div className="nav-avatar">{initials}</div>
-        <span className="nav-user-name">{user.nombre}</span>
-        <button onClick={logout} className="btn-logout">Salir</button>
+    </aside>
+  );
+};
+
+const TopBar = () => {
+  const { user, logout } = useAuth();
+  const initials = user?.nombre?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+
+  return (
+    <header className="topbar">
+      <div className="topbar-search">
+        <span className="topbar-search-icon">🔍</span>
+        <input type="text" placeholder="Buscar..." className="topbar-search-input" />
       </div>
-    </nav>
+      <div className="topbar-right">
+        <button className="topbar-notification" aria-label="Notificaciones">
+          🔔
+          <span className="topbar-notification-badge"></span>
+        </button>
+        <div className="topbar-user">
+          <div className="topbar-avatar">{initials}</div>
+          <span className="topbar-user-name">{user?.nombre}</span>
+          <button onClick={logout} className="topbar-logout" title="Cerrar sesión">⏷</button>
+        </div>
+      </div>
+    </header>
   );
 };
 
 const AppContent = () => {
   const { token } = useAuth();
 
+  if (!token) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/registro" element={<Registro />} />
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    );
+  }
+
   return (
-    <>
-      {token && <Navbar />}
-      <div className={`app-container ${token ? 'with-nav' : ''}`}>
-        <Routes>
-          <Route path="/login" element={token ? <Navigate to="/" /> : <Login />} />
-          <Route path="/registro" element={token ? <Navigate to="/" /> : <Registro />} />
-          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/ingreso" element={<PrivateRoute><RegistrarIngreso /></PrivateRoute>} />
-          <Route path="/gasto" element={<PrivateRoute><RegistrarGasto /></PrivateRoute>} />
-        </Routes>
+    <div className="app-layout">
+      <Sidebar />
+      <div className="app-main">
+        <TopBar />
+        <main className="app-content">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/ingreso" element={<RegistrarIngreso />} />
+            <Route path="/gasto" element={<RegistrarGasto />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </main>
       </div>
-    </>
+    </div>
   );
 };
 
