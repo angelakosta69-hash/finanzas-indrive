@@ -54,13 +54,3 @@ app.get('/', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
 });
-
-app.get('/', (req, res) => {
-  res.json({ status: 'ok', port: PORT });
-});
-
-console.log('Intentando iniciar en puerto:', PORT);
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
-});
