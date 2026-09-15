@@ -921,20 +921,21 @@ body {
 .input-with-clear input,
 .input-with-clear textarea {
   width: 100%;
+  padding-right: 40px;
 }
 
 .btn-clear-input {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: none;
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--danger);
-  font-size: 11px;
+  border: 1px solid var(--border);
+  background: var(--bg-card-hover);
+  color: var(--text-gray);
+  font-size: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -943,12 +944,13 @@ body {
 }
 
 .btn-clear-input:hover {
-  background: var(--danger);
-  color: white;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .btn-clear-textarea {
-  top: 16px;
+  top: 14px;
   transform: none;
 }
 
@@ -957,9 +959,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  padding: 12px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
   border-radius: var(--radius-sm);
   margin-bottom: 16px;
   font-size: 13px;
@@ -968,14 +971,15 @@ body {
 
 .last-entry span {
   color: var(--text-gray);
+  font-weight: 500;
 }
 
 .btn-undo {
-  background: none;
-  border: 1px solid var(--primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  color: var(--primary);
-  padding: 5px 12px;
+  color: var(--danger);
+  padding: 6px 14px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -983,8 +987,9 @@ body {
 }
 
 .btn-undo:hover {
-  background: var(--primary);
-  color: white;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--danger);
 }
 
 .btn-primary {
