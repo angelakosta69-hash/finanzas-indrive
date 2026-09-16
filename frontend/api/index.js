@@ -60,4 +60,15 @@ app.get('/api', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/api/test-db', async (req, res) => {
+  const pool = require('./config/db');
+  try {
+    const [users] = await pool.query('SELECT id, nombre FROM usuarios LIMIT 5');
+    const [ing] = await pool.query('SELECT COUNT(*) as total FROM ingresos');
+    res.json({ users, totalIngresos: ing[0].total });
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
 module.exports = app;
