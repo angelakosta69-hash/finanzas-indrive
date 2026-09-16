@@ -71,4 +71,20 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
+app.get('/api/test-token', async (req, res) => {
+  const jwt = require('jsonwebtoken');
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (!token) return res.json({ error: 'No token' });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const pool = require('./config/db');
+    const [users] = await pool.query('SELECT id, nombre, email FROM usuarios WHERE id = ?', [decoded.id]);
+    const [ing] = await pool.query('SELECT SUM(monto) as total FROM ingresos WHERE usuario_id = ?', [decoded.id]);
+    const [gas] = await pool.query('SELECT SUM(monto) as total FROM gastos WHERE usuario_id = ?', [decoded.id]);
+    res.json({ tokenUser: decoded, dbUser: users[0], ingresos: ing[0].total, gastos: gas[0].total });
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
 module.exports = app;
