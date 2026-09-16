@@ -36,10 +36,10 @@ const request = async (url, options = {}) => {
   } catch (err) {
     clearTimeout(timeout);
     if (err.name === 'AbortError') {
-      throw new Error('El servidor tardó demasiado. Intenta de nuevo.');
+      throw new Error('El servidor tardo demasiado. Intenta de nuevo.');
     }
-    if (err.message === 'Sesión expirada') throw err;
-    throw new Error('Error de conexión con el servidor');
+    if (err.message === 'Sesion expirada') throw err;
+    throw err;
   }
 };
 
