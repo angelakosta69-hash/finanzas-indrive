@@ -79,6 +79,7 @@ const Reportes = () => {
   const loadHistorial = async () => {
     try {
       const result = await api.dashboard.getHistorial();
+      console.log('Historial response:', JSON.stringify(result));
       setData(result);
     } catch (err) {
       console.error('Error loading historial:', err);
@@ -130,6 +131,7 @@ const Reportes = () => {
         <div className="error-message">
           Error al cargar reportes: {error}
         </div>
+        <pre style={{color:'#aaa',fontSize:12}}>{JSON.stringify(data, null, 2)}</pre>
       </div>
     );
   }
@@ -138,6 +140,11 @@ const Reportes = () => {
     <div className="reportes">
       <h2>Reportes</h2>
       <p className="subtitle">Historial mensual de todos tus ingresos y gastos</p>
+
+      <details style={{background:'var(--bg-card)',padding:12,borderRadius:8,marginBottom:16,border:'1px solid var(--border)',fontSize:12,color:'var(--text-gray)'}}>
+        <summary style={{cursor:'pointer'}}>Debug - Respuesta API</summary>
+        <pre style={{whiteSpace:'pre-wrap',marginTop:8}}>{JSON.stringify(data, null, 2)}</pre>
+      </details>
 
       <div className="report-summary-cards">
         <div className="report-card green">
