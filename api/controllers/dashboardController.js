@@ -166,14 +166,14 @@ const historial = async (req, res) => {
       }
     });
 
-    const historial = Object.values(mesesMap)
+    const resultado = Object.values(mesesMap)
       .map(h => ({ ...h, balance: h.ingresos - h.gastos }))
       .sort((a, b) => a.mes > b.mes ? -1 : 1);
 
-    res.json({ historial });
+    res.json({ historial: resultado });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error del servidor.' });
+    console.error('Historial error:', error.message, error.stack);
+    res.status(500).json({ message: 'Error del servidor: ' + error.message });
   }
 };
 
