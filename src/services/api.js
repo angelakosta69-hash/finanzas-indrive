@@ -15,7 +15,11 @@ const handleResponse = async (res) => {
     window.location.href = '/login';
     throw new Error('Sesión expirada');
   }
-  return res.json();
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || `Error ${res.status}`);
+  }
+  return data;
 };
 
 export const api = {

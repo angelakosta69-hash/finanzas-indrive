@@ -70,6 +70,7 @@ const BarChart = ({ data, height = 200 }) => {
 const Reportes = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadHistorial();
@@ -79,8 +80,9 @@ const Reportes = () => {
     try {
       const result = await api.dashboard.getHistorial();
       setData(result);
-    } catch (error) {
-      console.error('Error loading historial:', error);
+    } catch (err) {
+      console.error('Error loading historial:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -117,6 +119,17 @@ const Reportes = () => {
       <div className="loading">
         <div className="loading-spinner"></div>
         <span>Cargando reportes...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="reportes">
+        <h2>Reportes</h2>
+        <div className="error-message">
+          Error al cargar reportes: {error}
+        </div>
       </div>
     );
   }
