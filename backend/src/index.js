@@ -16,7 +16,6 @@ const authRoutes = require('./routes/auth');
 const ingresosRoutes = require('./routes/ingresos');
 const gastosRoutes = require('./routes/gastos');
 const dashboardRoutes = require('./routes/dashboard');
-const configRoutes = require('./routes/config');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -53,7 +52,6 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/ingresos', ingresosRoutes);
 app.use('/api/gastos', gastosRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/config', configRoutes);
 
 app.get('/api/categorias-gasto', async (req, res) => {
   const pool = require('./config/db');

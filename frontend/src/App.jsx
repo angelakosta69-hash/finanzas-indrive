@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard';
 import RegistrarIngreso from './pages/RegistrarIngreso';
 import RegistrarGasto from './pages/RegistrarGasto';
 import Reportes from './pages/Reportes';
-import Configuracion from './pages/Configuracion';
 
 const PrivateRoute = ({ children }) => {
   const { token } = useAuth();
@@ -21,30 +20,37 @@ const Sidebar = () => {
     { path: '/ingreso', icon: '💰', label: 'Ingreso' },
     { path: '/gasto', icon: '💸', label: 'Gasto' },
     { path: '/reportes', icon: '📈', label: 'Reportes' },
-    { path: '/configuracion', icon: '⚙️', label: 'Configuración' },
   ];
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-brand">
-        <span className="sidebar-brand-icon">📈</span>
-        <span className="sidebar-brand-text">Finanzas</span>
+      <div className="sidebar-top">
+        <div className="sidebar-brand">
+          <span className="sidebar-brand-icon">📈</span>
+          <span className="sidebar-brand-text">Finanzas</span>
+        </div>
+
+        <nav className="sidebar-nav">
+          {menuItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`sidebar-nav-item ${location.pathname === item.path ? 'active' : ''}`}
+            >
+              <span className="sidebar-nav-icon">{item.icon}</span>
+              <span className="sidebar-nav-label">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
       </div>
 
-      <nav className="sidebar-nav">
-        {menuItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`sidebar-nav-item ${location.pathname === item.path ? 'active' : ''}`}
-          >
-            <span className="sidebar-nav-icon">{item.icon}</span>
-            <span className="sidebar-nav-label">{item.label}</span>
-          </Link>
-        ))}
-      </nav>
-    </aside>
-
+      <div className="sidebar-bottom">
+        <div className="sidebar-motivation">
+          <div className="sidebar-motivation-icon">📈</div>
+          <p className="sidebar-motivation-text">Pequeños hábitos, grandes resultados</p>
+          <div className="sidebar-motivation-bar"></div>
+        </div>
+      </div>
     </aside>
   );
 };
@@ -57,7 +63,6 @@ const MobileHeader = () => {
     if (location.pathname === '/ingreso') return '💰 Ingreso';
     if (location.pathname === '/gasto') return '💸 Gasto';
     if (location.pathname === '/reportes') return '📈 Reportes';
-    if (location.pathname === '/configuracion') return '⚙️ Configuración';
     return '📊 Panel';
   };
 
@@ -116,10 +121,6 @@ const MobileNav = () => {
         <span className="mobile-nav-icon">📈</span>
         <span className="mobile-nav-label">Reportes</span>
       </Link>
-      <Link to="/configuracion" className={`mobile-nav-item ${location.pathname === '/configuracion' ? 'active' : ''}`}>
-        <span className="mobile-nav-icon">⚙️</span>
-        <span className="mobile-nav-label">Ajustes</span>
-      </Link>
     </nav>
   );
 };
@@ -149,7 +150,6 @@ const AppContent = () => {
             <Route path="/ingreso" element={<RegistrarIngreso />} />
             <Route path="/gasto" element={<RegistrarGasto />} />
             <Route path="/reportes" element={<Reportes />} />
-            <Route path="/configuracion" element={<Configuracion />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>

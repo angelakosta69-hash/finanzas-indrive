@@ -119,31 +119,5 @@ export const api = {
     listar: async () => {
       return request(`${API_URL}/categorias-gasto`, { headers: getHeaders() });
     }
-  },
-  config: {
-    getPerfil: async () => {
-      return request(`${API_URL}/config`, { headers: getHeaders() });
-    },
-    actualizarNombre: async (nombre) => {
-      return request(`${API_URL}/config/nombre`, {
-        method: 'PUT',
-        headers: getHeaders(),
-        body: JSON.stringify({ nombre })
-      });
-    },
-    actualizarTelefono: async (telefono) => {
-      return request(`${API_URL}/config/telefono`, {
-        method: 'PUT',
-        headers: getHeaders(),
-        body: JSON.stringify({ telefono })
-      });
-    },
-    cambiarPassword: async (passwordActual, passwordNueva) => {
-      return request(`${API_URL}/config/password`, {
-        method: 'PUT',
-        headers: getHeaders(),
-        body: JSON.stringify({ passwordActual, passwordNueva })
-      });
-    }
   }
 };
