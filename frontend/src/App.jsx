@@ -26,33 +26,25 @@ const Sidebar = () => {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-top">
-        <div className="sidebar-brand">
-          <span className="sidebar-brand-icon">📈</span>
-          <span className="sidebar-brand-text">Finanzas</span>
-        </div>
-
-        <nav className="sidebar-nav">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`sidebar-nav-item ${location.pathname === item.path ? 'active' : ''}`}
-            >
-              <span className="sidebar-nav-icon">{item.icon}</span>
-              <span className="sidebar-nav-label">{item.label}</span>
-            </Link>
-          ))}
-        </nav>
+      <div className="sidebar-brand">
+        <span className="sidebar-brand-icon">📈</span>
+        <span className="sidebar-brand-text">Finanzas</span>
       </div>
 
-      <div className="sidebar-bottom">
-        <div className="sidebar-motivation">
-          <div className="sidebar-motivation-icon">📈</div>
-          <p className="sidebar-motivation-text">Pequeños hábitos, grandes resultados</p>
-          <div className="sidebar-motivation-bar"></div>
-        </div>
-      </div>
+      <nav className="sidebar-nav">
+        {menuItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className={`sidebar-nav-item ${location.pathname === item.path ? 'active' : ''}`}
+          >
+            <span className="sidebar-nav-icon">{item.icon}</span>
+            <span className="sidebar-nav-label">{item.label}</span>
+          </Link>
+        ))}
+      </nav>
+    </aside>
+
     </aside>
   );
 };

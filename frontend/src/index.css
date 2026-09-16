@@ -80,14 +80,13 @@ body {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 32px;
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
   z-index: 200;
   padding: 24px 16px;
-  overflow-y: auto;
 }
 
 .sidebar-top {
