@@ -132,4 +132,49 @@ const dia = async (req, res) => {
   }
 };
 
-module.exports = { resumen, dia };
+const historial = async (req, res) => {
+  try {
+    const usuario_id = req.usuario.id;
+
+    const [ingresosPorMes] = await pool.query(
+      `SELECT DATE_FORMAT(fecha, '%Y-%m') as mes, SUM(monto) as total
+       FROM ingresos WHERE usuario_id = ?
+       GROUP BY DATE_FORMAT(fecha, '%Y-%m')
+       ORDER BY mes DESC LIMIT 12`,
+      [usuario_id]
+    );
+
+    const [gastosPorMes] = await pool.query(
+      `SELECT DATE_FORMAT(fecha, '%Y-%m') as mes, SUM(monto) as total
+       FROM gastos WHERE usuario_id = ?
+       GROUP BY DATE_FORMAT(fecha, '%Y-%m')
+       ORDER BY mes DESC LIMIT 12`,
+      [usuario_id]
+    );
+
+    const mesesMap = {};
+
+    ingresosPorMes.forEach(i => {
+      mesesMap[i.mes] = { mes: i.mes, ingresos: parseFloat(i.total), gastos: 0 };
+    });
+
+    gastosPorMes.forEach(g => {
+      if (mesesMap[g.mes]) {
+        mesesMap[g.mes].gastos = parseFloat(g.total);
+      } else {
+        mesesMap[g.mes] = { mes: g.mes, ingresos: 0, gastos: parseFloat(g.total) };
+      }
+    });
+
+    const historial = Object.values(mesesMap)
+      .map(h => ({ ...h, balance: h.ingresos - h.gastos }))
+      .sort((a, b) => a.mes > b.mes ? -1 : 1);
+
+    res.json({ historial });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+module.exports = { resumen, dia, historial };

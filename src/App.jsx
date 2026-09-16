@@ -5,6 +5,7 @@ import Registro from './pages/Registro';
 import Dashboard from './pages/Dashboard';
 import RegistrarIngreso from './pages/RegistrarIngreso';
 import RegistrarGasto from './pages/RegistrarGasto';
+import Reportes from './pages/Reportes';
 
 const PrivateRoute = ({ children }) => {
   const { token } = useAuth();
@@ -26,6 +27,7 @@ const Navbar = () => {
         <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Dashboard</Link>
         <Link to="/ingreso" className={location.pathname === '/ingreso' ? 'active' : ''}>Ingreso</Link>
         <Link to="/gasto" className={location.pathname === '/gasto' ? 'active' : ''}>Gasto</Link>
+        <Link to="/reportes" className={location.pathname === '/reportes' ? 'active' : ''}>Reportes</Link>
       </div>
       <div className="nav-user">
         <span>{user.nombre}</span>
@@ -48,6 +50,7 @@ const AppContent = () => {
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/ingreso" element={<PrivateRoute><RegistrarIngreso /></PrivateRoute>} />
           <Route path="/gasto" element={<PrivateRoute><RegistrarGasto /></PrivateRoute>} />
+          <Route path="/reportes" element={<PrivateRoute><Reportes /></PrivateRoute>} />
         </Routes>
       </div>
     </>
