@@ -19,50 +19,10 @@ const BarChart = ({ data, height = 200 }) => {
 
           return (
             <g key={d.mes}>
-              {/* Ingresos */}
-              <rect
-                x={x}
-                y={height - hIng}
-                width={barWidth / 3}
-                height={hIng}
-                fill="#10b981"
-                rx="3"
-                className="bar-animate"
-                style={{ animationDelay: `${i * 0.1}s` }}
-              />
-              {/* Gastos */}
-              <rect
-                x={x + barWidth / 3}
-                y={height - hGas}
-                width={barWidth / 3}
-                height={hGas}
-                fill="#ef4444"
-                rx="3"
-                className="bar-animate"
-                style={{ animationDelay: `${i * 0.1 + 0.05}s` }}
-              />
-              {/* Balance */}
-              <rect
-                x={x + (barWidth / 3) * 2}
-                y={height - hBal}
-                width={barWidth / 3}
-                height={hBal}
-                fill="#3b82f6"
-                rx="3"
-                className="bar-animate"
-                style={{ animationDelay: `${i * 0.1 + 0.1}s` }}
-              />
-              {/* Label mes */}
-              <text
-                x={x + barWidth / 2}
-                y={height + 18}
-                textAnchor="middle"
-                fill="#7a7a9a"
-                fontSize="11"
-                fontWeight="500"
-              >
-                {d.mesLabel}
-              </text>
+              <rect x={x} y={height - hIng} width={barWidth / 3} height={hIng} fill="#10b981" rx="3" className="bar-animate" style={{ animationDelay: `${i * 0.1}s` }} />
+              <rect x={x + barWidth / 3} y={height - hGas} width={barWidth / 3} height={hGas} fill="#ef4444" rx="3" className="bar-animate" style={{ animationDelay: `${i * 0.1 + 0.05}s` }} />
+              <rect x={x + (barWidth / 3) * 2} y={height - hBal} width={barWidth / 3} height={hBal} fill="#3b82f6" rx="3" className="bar-animate" style={{ animationDelay: `${i * 0.1 + 0.1}s` }} />
+              <text x={x + barWidth / 2} y={height + 18} textAnchor="middle" fill="#7a7a9a" fontSize="11" fontWeight="500">{d.mesLabel}</text>
             </g>
           );
         })}
@@ -72,22 +32,45 @@ const BarChart = ({ data, height = 200 }) => {
 };
 
 const Reportes = () => {
-  const [data, setData] = useState(null);
+  const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    loadHistorial();
+    loadData();
   }, []);
 
-  const loadHistorial = async () => {
+  const loadData = async () => {
     try {
-      const result = await api.dashboard.getHistorial();
-      console.log('Historial response:', JSON.stringify(result));
-      setData(result);
+      const [ingresos, gastos] = await Promise.all([
+        api.ingresos.listar(),
+        api.gastos.listar()
+      ]);
+
+      const mesesMap = {};
+
+      (ingresos || []).forEach(ing => {
+        const mes = ing.fecha.substring(0, 7);
+        if (!mesesMap[mes]) mesesMap[mes] = { mes, ingresos: 0, gastos: 0 };
+        mesesMap[mes].ingresos += parseFloat(ing.monto);
+      });
+
+      (gastos || []).forEach(gas => {
+        const mes = gas.fecha.substring(0, 7);
+        if (!mesesMap[mes]) mesesMap[mes] = { mes, ingresos: 0, gastos: 0 };
+        mesesMap[mes].gastos += parseFloat(gas.monto);
+      });
+
+      const resultado = Object.values(mesesMap)
+        .map(h => ({
+          ...h,
+          balance: h.ingresos - h.gastos,
+          mesLabel: formatMes(h.mes)
+        }))
+        .sort((a, b) => a.mes > b.mes ? -1 : 1);
+
+      setHistorial(resultado);
     } catch (err) {
-      console.error('Error loading historial:', err);
-      setError(err.message);
+      console.error('Error loading reportes:', err);
     } finally {
       setLoading(false);
     }
@@ -107,11 +90,6 @@ const Reportes = () => {
     return date.toLocaleDateString('es-CO', { month: 'short', year: '2-digit' });
   };
 
-  const historial = data?.historial?.map(h => ({
-    ...h,
-    mesLabel: formatMes(h.mes)
-  })) || [];
-
   const totalIngresos = historial.reduce((s, h) => s + h.ingresos, 0);
   const totalGastos = historial.reduce((s, h) => s + h.gastos, 0);
   const totalBalance = totalIngresos - totalGastos;
@@ -128,28 +106,11 @@ const Reportes = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="reportes">
-        <h2>📈 Reportes</h2>
-        <div className="error-message">
-          Error: {error}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="reportes">
-      <h2>📈 Reportes</h2>
+      <h2>Reportes</h2>
       <p className="subtitle">Historial mensual de todos tus ingresos y gastos</p>
 
-      <details style={{background:'var(--bg-card)',padding:12,borderRadius:8,marginBottom:16,border:'1px solid var(--border)',fontSize:12,color:'var(--text-gray)'}}>
-        <summary style={{cursor:'pointer'}}>Debug - Respuesta API</summary>
-        <pre style={{whiteSpace:'pre-wrap',marginTop:8}}>{JSON.stringify(data, null, 2)}</pre>
-      </details>
-
-      {/* Resumen General */}
       <div className="report-summary-cards">
         <div className="report-card green">
           <div className="report-card-icon">💰</div>
@@ -174,7 +135,6 @@ const Reportes = () => {
         </div>
       </div>
 
-      {/* Promedios */}
       <div className="report-averages">
         <div className="report-avg-item">
           <span className="report-avg-label">Promedio mensual ingresos</span>
@@ -192,9 +152,8 @@ const Reportes = () => {
         )}
       </div>
 
-      {/* Gráfico de barras */}
       <div className="report-chart-section">
-        <h3>Comparación mensual</h3>
+        <h3>Comparacion mensual</h3>
         <div className="chart-legend">
           <span className="legend-item"><span className="legend-dot green"></span> Ingresos</span>
           <span className="legend-item"><span className="legend-dot red"></span> Gastos</span>
@@ -203,7 +162,6 @@ const Reportes = () => {
         <BarChart data={historial} />
       </div>
 
-      {/* Tabla de historial */}
       <div className="report-table-section">
         <h3>Detalle por mes</h3>
         <div className="report-table-wrapper">
@@ -225,6 +183,9 @@ const Reportes = () => {
                   <td className={h.balance >= 0 ? 'positive' : 'negative'}>{formatMoney(h.balance)}</td>
                 </tr>
               ))}
+              {historial.length === 0 && (
+                <tr><td colSpan="4" className="no-data">No hay datos para mostrar</td></tr>
+              )}
             </tbody>
           </table>
         </div>
